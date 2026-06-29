@@ -1,0 +1,45 @@
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
+import { User } from 'src/users/entities/user.entity';
+import { ProposalEvaluationCommittee } from 'src/proposal-evaluation/proposal-evaluation-committee.entity';
+@Entity('supervisors')
+export class Supervisor {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  // 🔵 LINK TO USER TABLE (AUTH)
+  @Column({ name: 'user_id',nullable:true })
+  userId: number;
+
+  @ManyToOne(() => User, { eager: true, })
+  @JoinColumn({ name: 'user_id' })
+  user: User;
+
+  // 🟢 SUPERVISOR PROFILE DATA
+  @Column('text', { array: true, nullable: true })
+  expertise: string[];
+
+  @Column({ nullable: true })
+  designation: string;
+
+  // 🟡 TIMESTAMP
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
+  @Column({ name: 'proposal_committee_id', type: 'int', nullable: true })
+  proposalCommitteeId: number | null;
+
+  // 🔄 Relationship: Bohot saare supervisors kisi aik PEC ka hissa ho sakte hain
+  @ManyToOne(
+    () => ProposalEvaluationCommittee, 
+    (committee) => committee.supervisors, 
+    { nullable: true, onDelete: 'SET NULL' } // Agar committee delete ho to supervisor delete na ho, bas null ho jaye
+  )
+  @JoinColumn({ name: 'proposal_committee_id', },)
+  proposalCommittee: ProposalEvaluationCommittee;
+}
