@@ -9,7 +9,7 @@ import { UpdateRubricDto } from './dto/update-rubrics.dto';
 import { EvaluationScore } from './entities/evaluation-score.entity';
 import { GroupPhaseStatus } from './entities/group-phase-status.entity';
 import { MilestoneSubmission } from './entities/milestone-submission.entity';
-import { uploadFileToCloudinary } from 'src/utils/UploadtoCloudinary';
+
 import axios from 'axios';
 import * as mammoth from 'mammoth';
 const pdfParse = require('pdf-parse');
@@ -201,42 +201,39 @@ export class EvaluationService {
     await this.groupStatusRepo.save(status);
   }
 
-async submitGroupDocument(groupId: number, phaseId: number, studentId: number, file: Express.Multer.File) {
-    if (!file) {
-      throw new BadRequestException('No file uploaded.');
-    }
+async submitGroupDocument(
+  groupId: number,
+  phaseId: number,
+  studentId: number,
+  githubLink: string, // 👈 Naya parameter
+  file: Express.Multer.File,
+) {
+  // 1. Check if already submitted
+  const existingDoc = await this.submissionRepo.findOne({ where: { groupId, phaseId } });
+  if (existingDoc) throw new BadRequestException('Group already submitted for this phase.');
 
-    const existingDoc = await this.submissionRepo.findOne({ where: { groupId, phaseId } });
-    if (existingDoc) {
-      throw new BadRequestException('Your group has already submitted the document for this phase.');
-    }
+  // 2. AI checking ke liye file memory mein hi process hogi
+  const extractedText = await this.extractTextFromFile(file);
+  const { score, summary } = await this.checkAiContent(extractedText);
 
-    // 1. Cloudinary par file upload karein aur URL hasil karein
-    const fileUrl = await uploadFileToCloudinary(file);
+  // 3. Nayi submission create karein
+  const newSubmission = this.submissionRepo.create({
+    groupId,
+    phaseId,
+    submittedByStudentId: studentId,
+    
+    // 👇 Yahan file.originalname ki jagah direct githubLink save karein
+    documentUrl: githubLink, 
+    
+    aiDetectionScore: score,
+    aiReportSummary: summary,
+  });
 
-    // 2. AI Content Check
-    const extractedText = await this.extractTextFromFile(file);
-    const { score, summary } = await this.checkAiContent(extractedText);
-
-    // 3. Database mein Cloudinary ka 'fileUrl' save karein
-    const newSubmission = this.submissionRepo.create({
-      groupId,
-      phaseId,
-      submittedByStudentId: studentId,
-      documentUrl: fileUrl, // 👈 Ab yahan Cloudinary ka real link jayega
-      aiDetectionScore: score,
-      aiReportSummary: summary,
-    });
-
-    await this.submissionRepo.save(newSubmission);
-
-    return {
-      success: true,
-      message: 'Document uploaded successfully to Cloudinary. AI analysis logged.',
-      documentUrl: fileUrl
-    };
-  }
-
+  return await this.submissionRepo.save(newSubmission);
+  
+  // Note: Aapne file ko cloud par save nahi kiya. 
+  // Ye memory se check hone ke baad khud destroy ho jayegi.
+}
   async getGroupDocumentForEvaluation(groupId: number, phaseId: number) {
     const submission = await this.submissionRepo.findOne({ where: { groupId, phaseId } });
     if (!submission) {
@@ -256,32 +253,30 @@ async submitGroupDocument(groupId: number, phaseId: number, studentId: number, f
   }
 
   private async extractTextFromFile(file: Express.Multer.File): Promise<string> {
-    if (!file || !file.buffer) {
-      throw new BadRequestException('No file uploaded or file data is missing.');
-    }
-
-    const lowerName = file.originalname.toLowerCase();
-
-    try {
-      let extractedText = '';
-
-      if (lowerName.endsWith('.docx')) {
-        const result = await mammoth.extractRawText({ buffer: file.buffer });
-        extractedText = result.value;
-      } else if (lowerName.endsWith('.pdf')) {
-        const parsePdf = pdfParse.default || pdfParse;
-        const data = await parsePdf(file.buffer);
-        extractedText = data.text;
-      } else {
-        throw new BadRequestException('Unsupported file format. Only .pdf and .docx are allowed.');
-      }
-
-      return extractedText.substring(0, 3000);
-    } catch (error) {
-      if (error instanceof BadRequestException) throw error;
-      throw new BadRequestException(`Failed to read or extract text from the uploaded file. Details: ${error.message}`);
-    }
+  if (!file || !file.buffer) {
+    throw new BadRequestException('File data is missing.');
   }
+
+  const lowerName = file.originalname.toLowerCase();
+  let extractedText = '';
+
+  try {
+    if (lowerName.endsWith('.docx')) {
+      const result = await mammoth.extractRawText({ buffer: file.buffer });
+      extractedText = result.value;
+    } else if (lowerName.endsWith('.pdf')) {
+      const parsePdf = pdfParse.default || pdfParse;
+      const data = await parsePdf(file.buffer);
+      extractedText = data.text;
+    } else {
+      throw new BadRequestException('Only .pdf and .docx are allowed.');
+    }
+
+    return extractedText.substring(0, 3000);
+  } catch (error) {
+    throw new BadRequestException(`Failed to read file: ${error.message}`);
+  }
+}
 
   private async checkAiContent(text: string): Promise<{ score: number; summary: string; isSimulated: boolean }> {
     const token = process.env.FYP_DETECTOR;

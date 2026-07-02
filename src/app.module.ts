@@ -22,6 +22,7 @@ import { ConfigModule } from '@nestjs/config';
 
 import { MailerModule } from '@nestjs-modules/mailer'; // ✅ ADD THIS
 import { EvaluationModule } from './evaluation/evaluation.module';
+import { SupervisorIdeaModule } from './supervisor-idea/supervisor-idea.module';
 import * as multer from 'multer';
 
 @Module({
@@ -68,6 +69,7 @@ import * as multer from 'multer';
     GroupsModule,
     CommitteeAssignmentModule,
     EvaluationModule,
+    SupervisorIdeaModule,
   ],
 
   controllers: [AppController],

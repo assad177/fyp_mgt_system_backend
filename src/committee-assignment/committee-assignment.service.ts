@@ -1,4 +1,4 @@
-// committee-assignment.service.ts
+
 import { Injectable, Logger,NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository, IsNull, DataSource,In } from "typeorm";

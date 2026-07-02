@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Param, Delete, Patch, Get, ParseIntPipe,UploadedFile, } from '@nestjs/common';
+import { Controller, Post, Body, Param, Delete, Patch, Get, ParseIntPipe,UploadedFile,BadRequestException} from '@nestjs/common';
 import { CreatePhaseDto } from './dto/create-phase.dto';
 import { EvaluationService } from './evaluation.service';
 import { CreateRubricDto } from './dto/create-rubric.dto';
@@ -86,17 +86,22 @@ export class EvaluationController {
   }
 
 
-
 @Post('submit-document/:groupId/:phaseId/:studentId')
 @UseInterceptors(FileInterceptor('file'))
 async uploadDocument(
   @Param('groupId') groupId: number,
   @Param('phaseId') phaseId: number,
   @Param('studentId') studentId: number,
+  @Body('githubLink') githubLink: string, 
   @UploadedFile() file: Express.Multer.File,
 ) {
+  console.log(githubLink)
+  if (!file) throw new BadRequestException('File is required for AI evaluation.');
+  if (!githubLink) throw new BadRequestException('GitHub link is required.');
 
-  return await this.evaluationService.submitGroupDocument(groupId, phaseId, studentId, file);
+  return await this.evaluationService.submitGroupDocument(
+    groupId, phaseId, studentId, githubLink, file
+  );
 }
 
  
