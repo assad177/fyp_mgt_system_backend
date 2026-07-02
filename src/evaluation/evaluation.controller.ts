@@ -56,11 +56,6 @@ export class EvaluationController {
     return await this.evaluationService.getEvaluationFormForGroup(Number(groupId));
   }
 
-  // ==========================================
-  // PHASE 3 & 4 ENDPOINTS
-  // ==========================================
-
-  // Step 12: GET current locking status for a specific group & phase
   @Get('status/:groupId/:phaseId')
   async getStatus(
     @Param('groupId', ParseIntPipe) groupId: number,
@@ -69,7 +64,6 @@ export class EvaluationController {
     return await this.evaluationService.getGroupPhaseStatus(groupId, phaseId);
   }
 
-  // Committee submission endpoint
   @Post('submit/committee/:groupId/:evaluatorId/:phaseId')
   async submitCommitteeMarks(
     @Param('groupId', ParseIntPipe) groupId: number,
@@ -93,9 +87,6 @@ export class EvaluationController {
 
 
 
-
-
-  //----------------------------//
 @Post('submit-document/:groupId/:phaseId/:studentId')
 @UseInterceptors(FileInterceptor('file'))
 async uploadDocument(
@@ -104,19 +95,26 @@ async uploadDocument(
   @Param('studentId') studentId: number,
   @UploadedFile() file: Express.Multer.File,
 ) {
-  // fileUrl ki jagah 'file' pass karein:
+
   return await this.evaluationService.submitGroupDocument(groupId, phaseId, studentId, file);
 }
 
-  /**
-   * Endpoint for Committee and Supervisors to see the document and AI report during grading
-   * GET /evaluation/view-document/:groupId/:phaseId
-   */
+ 
   @Get('view-document/:groupId/:phaseId')
   async viewDocumentForEvaluation(
     @Param('groupId', ParseIntPipe) groupId: number,
     @Param('phaseId', ParseIntPipe) phaseId: number,
   ) {
     return await this.evaluationService.getGroupDocumentForEvaluation(groupId, phaseId);
+ 
+ 
+  }
+
+@Get('marks/:groupId/:phaseId')
+  async getMarks(
+    @Param('groupId', ParseIntPipe) groupId: number,
+    @Param('phaseId', ParseIntPipe) phaseId: number,
+  ) {
+    return await this.evaluationService.getStudentMarksByPhase(groupId, phaseId);
   }
 }
