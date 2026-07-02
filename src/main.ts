@@ -20,7 +20,7 @@ async function bootstrap() {
 
   });
 
-  console.log('the server is running on port' + (process.env.PORT ?? 3000));
+  console.log('the server is running on port' + (process.env.PORT?? 3000));
 
  
 

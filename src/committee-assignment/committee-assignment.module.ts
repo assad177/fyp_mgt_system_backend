@@ -10,10 +10,11 @@ import { Committee } from './entities/committee.entity';
 
 
 import { Proposal } from 'src/proposal/entities/proposal.entity';
+import { CommitteeMember } from './entities/committe-members.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Group, Supervisor, Committee,Proposal]),
+    TypeOrmModule.forFeature([Group, Supervisor, Committee,Proposal,CommitteeMember]),
   MailerModule],
   controllers: [CommitteeAssignmentController], // 🔥 IMPORTANT
   providers: [

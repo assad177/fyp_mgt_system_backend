@@ -32,8 +32,6 @@ export class ProposalService {
     if (!embeddings) {
       throw new Error('Embeddings not returned from Python API');
     }
-
-    // DB Level par optimized similarity search call ho rahi hai
     const similar = await this.findSimilarProjects(embeddings);
 
     const highestSimilarity =
@@ -94,9 +92,6 @@ export class ProposalService {
     };
   }
 
-  // ================================
-  // GET STUDENT PROPOSAL
-  // ================================
   async getStudentProposal(studentId: number) {
     return this.repo.findOne({
       where: { studentId },
@@ -104,18 +99,13 @@ export class ProposalService {
     });
   }
 
-  // ================================
-  // FETCH ALL PROPOSALS
-  // ================================
   async fetchAllProposals() {
     return this.repo.find({
       order: { createdAt: 'DESC' },
     });
   }
 
-  // ================================
-  // PYTHON API CALL FOR EMBEDDINGS
-  // ================================
+
   private async getEmbeddingsFromPython(
     body: any,
     file: Express.Multer.File,

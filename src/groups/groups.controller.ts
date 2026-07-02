@@ -1,19 +1,19 @@
-import { Controller,Get,Param,Body,Patch,ParseIntPipe } from '@nestjs/common';
+import { Controller,Get,Param,Body,Patch,ParseIntPipe,Req } from '@nestjs/common';
 import { GroupsService } from './groups.service';
+
 
 @Controller('groups')
 export class GroupsController {
     constructor(private readonly groupService:GroupsService){}
 
-
+@Get('repo/:groupId')
+async getGroupRepo(@Param('groupId', ParseIntPipe) groupId: number) {
+  return await this.groupService.getRepoUrl(groupId);
+}
     @Get('my-groups/:supervisorId')
     getMyGroups(@Param('supervisorId') supervisorId: number) {
       return this.groupService.getGroupsBySupervisor(supervisorId);
     }
-
-
-
-
     @Patch('update-repo/:groupId')
 updateRepo(
   @Param('groupId') groupId: number,
@@ -34,4 +34,11 @@ getPerformance(@Param('groupId') groupId: number) {
     console.log(studentId)
     return await this.groupService.getGroupByStudentId(studentId);
   }
+
+@Get('my-evaluation-groups/:supervisorId')
+async getMyAssignedGroups(@Param('supervisorId') supervisorId: number) {
+  console.log(supervisorId)
+  
+  return await this.groupService.getGroupsForSupervisor(Number(supervisorId));
+}
 }

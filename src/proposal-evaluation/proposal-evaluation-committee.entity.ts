@@ -13,10 +13,10 @@ export class ProposalEvaluationCommittee {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'varchar', length: 100 })
+  @Column({ type: 'varchar', length: 100,nullable:true })
   name: string; // e.g., "AI Proposal Evaluation Committee"
 
-  @Column({ type: 'varchar', length: 50 })
+  @Column({ type: 'varchar', length: 50 ,nullable:true})
   domain: string; // e.g., "AI", "Web", "Mobile", "Cybersecurity"
 
   // 🔄 Relationship: Ek PEC mein bohot saare supervisors (members) ho sakte hain

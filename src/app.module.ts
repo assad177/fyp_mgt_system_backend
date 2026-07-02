@@ -21,6 +21,7 @@ import { MulterModule } from '@nestjs/platform-express';
 import { ConfigModule } from '@nestjs/config';
 
 import { MailerModule } from '@nestjs-modules/mailer'; // ✅ ADD THIS
+import { EvaluationModule } from './evaluation/evaluation.module';
 import * as multer from 'multer';
 
 @Module({
@@ -66,6 +67,7 @@ import * as multer from 'multer';
     ChatModule,
     GroupsModule,
     CommitteeAssignmentModule,
+    EvaluationModule,
   ],
 
   controllers: [AppController],

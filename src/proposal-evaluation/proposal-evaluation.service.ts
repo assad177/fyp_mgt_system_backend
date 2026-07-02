@@ -90,9 +90,7 @@ async submitToPec(proposalData: {
   };
 }
 
-  // =========================================================================
-  // 2. FYP OFFICE / ADMIN: CREATE PEC MANUALLY WITH TAGS & SUPERVISORS
-  // =========================================================================
+  
   async createPec(data: { name: string; domain: string; supervisorIds?: number[] }) {
     // New committee record insert karein
     const committee = this.pecRepo.create({
@@ -115,9 +113,7 @@ async submitToPec(proposalData: {
     });
   }
 
-  // =========================================================================
-  // 3. FYP OFFICE / ADMIN: EDIT PEC & MANAGE MEMBERS (ADD/REMOVE)
-  // =========================================================================
+  
   async updatePec(id: number, data: { name?: string; domain?: string; supervisorIds?: number[] }) {
     const pec = await this.pecRepo.findOne({ where: { id } });
     if (!pec) throw new NotFoundException('Proposal Evaluation Committee (PEC) not found');

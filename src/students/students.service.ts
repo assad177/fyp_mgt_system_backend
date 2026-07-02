@@ -115,9 +115,7 @@ async getStudentDashboard(studentId: number) {
     };
   }
 
-  // Step 3: 🔥 FIXING LINE 🔥
-  // Ab proposals table se data nikalne ke liye studentId use MAT karein.
-  // Balki jo student.proposalId hume upar mili hai, us se project dhoondein!
+  
   const proposal = await this.proposalRepo.findOne({
     where: { id: student.proposalId }, // 👈 Yeh leader aur baqi dono members ke liye true hoga!
     relations: ['student', 'student.user'], // Agar proposal ke sath leader ki details bhi dikhani hon
