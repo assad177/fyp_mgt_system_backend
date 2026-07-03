@@ -13,13 +13,43 @@ export class StudentsService {
      @InjectRepository(Proposal) private proposalRepo:Repository<Proposal>
   ) { }
 
+// =========================================================================
+// getMyCommittee — Leader AUR Member dono ke liye kaam karta hai
+// =========================================================================
 async getMyCommittee(studentId: number) {
-  return await this.groupRepo
+  // Step 1: Pehle leader ke tor par dhundho
+  let groupResult = await this.groupRepo
     .createQueryBuilder('g')
     .leftJoinAndSelect('g.committee', 'c')
     .leftJoinAndSelect('c.members', 'members')
     .leftJoinAndSelect('members.user', 'user')
     .where('g.leadStudentId = :studentId', { studentId })
+    .select([
+      'g.id',
+      'c.id',
+      'c.name',
+      'members.id',
+      'members.designation',
+      'user.id',
+      'user.name',
+      'user.email',
+    ])
+    .getOne();
+
+  if (groupResult) return groupResult;
+
+  // Step 2: Member student — regNo se dhundho
+  const student = await this.studentRepo.findOne({ where: { id: studentId } });
+  if (!student || !student.regNo) return null;
+
+  return this.groupRepo
+    .createQueryBuilder('g')
+    .leftJoinAndSelect('g.committee', 'c')
+    .leftJoinAndSelect('c.members', 'members')
+    .leftJoinAndSelect('members.user', 'user')
+    .where(`g."studentRegs"::jsonb @> :regArr::jsonb`, {
+      regArr: JSON.stringify([student.regNo]),
+    })
     .select([
       'g.id',
       'c.id',
@@ -93,10 +123,11 @@ async findByRegNo(regNo: string): Promise<Student | null> {
 }
 
 
-// src/students/students.service.ts (Ya jahan aapka dashboard ka method hai)
-
+// =========================================================================
+// getStudentDashboard — groupId bhi return karta hai (ek hi call mein sab)
+// =========================================================================
 async getStudentDashboard(studentId: number) {
-  // Step 1: Pehle login student ka apna record database se uthaein
+  // Step 1: Student record fetch karo
   const student = await this.studentRepo.findOne({
     where: { id: studentId }
   });
@@ -105,26 +136,45 @@ async getStudentDashboard(studentId: number) {
     throw new NotFoundException('Student record not found.');
   }
 
-  // Step 2: Check karein ke kya is student ki row mein koi proposalId locked hai?
+  // Step 2: Group ID dhundho (leader ya member dono case)
+  let groupId: number | null = null;
+  const leaderGroup = await this.groupRepo.findOne({
+    where: { leadStudentId: studentId },
+    select: ['id'],
+  });
+  if (leaderGroup) {
+    groupId = leaderGroup.id;
+  } else if (student.regNo) {
+    const memberGroup = await this.groupRepo
+      .createQueryBuilder('g')
+      .where(`g."studentRegs"::jsonb @> :regArr::jsonb`, {
+        regArr: JSON.stringify([student.regNo]),
+      })
+      .select(['g.id'])
+      .getOne();
+    if (memberGroup) groupId = memberGroup.id;
+  }
+
+  // Step 3: Proposal check
   if (!student.proposalId) {
-    // Agar proposalId null hai, toh iska matlab isne abhi koi proposal submit nahi kiya
     return {
       hasProposal: false,
       message: 'Show "Submit Proposal" screen to this student.',
-      data: null
+      data: null,
+      groupId,
     };
   }
 
-  
   const proposal = await this.proposalRepo.findOne({
-    where: { id: student.proposalId }, // 👈 Yeh leader aur baqi dono members ke liye true hoga!
-    relations: ['student', 'student.user'], // Agar proposal ke sath leader ki details bhi dikhani hon
+    where: { id: student.proposalId },
+    relations: ['student', 'student.user'],
   });
 
   return {
     hasProposal: true,
     message: 'Show "Proposal Status/Details" screen to this student.',
-    data: proposal
+    data: proposal,
+    groupId,
   };
 }
 }

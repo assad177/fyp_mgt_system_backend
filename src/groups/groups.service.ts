@@ -1,15 +1,17 @@
-import { Injectable,NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository,In } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { Group } from './entities/group.entity';
 import { Committee } from 'src/committee-assignment/entities/committee.entity';
+import { Student } from 'src/students/entities/student.entity';
 import axios from 'axios';
 @Injectable()
 export class GroupsService {
-    @InjectRepository(Group) private  groupRepo:Repository<Group>
-    @InjectRepository(Committee) private  committeeRepo:Repository<Group>
+  @InjectRepository(Group) private groupRepo: Repository<Group>
+  @InjectRepository(Committee) private committeeRepo: Repository<Group>
+  @InjectRepository(Student) private studentRepo: Repository<Student>
 
-    async getGroupsBySupervisor(supervisorId: number) {
+  async getGroupsBySupervisor(supervisorId: number) {
     return await this.groupRepo
       .createQueryBuilder('g')
       .leftJoinAndSelect('g.proposal', 'p')
@@ -23,103 +25,123 @@ export class GroupsService {
         'g.createdAt',
       ])
       .getMany();
-  
-}
-    async updateRepo(groupId: number, body: any) {
-  const group = await this.groupRepo.findOne({ where: { id: groupId } });
 
-  if (!group) throw new Error("Group not found");
+  }
+  async updateRepo(groupId: number, body: any) {
+    const group = await this.groupRepo.findOne({ where: { id: groupId } });
 
-  group.repoUrl = body.repoUrl;
-  group.githubUsernames = body.githubUsernames;
+    if (!group) throw new Error("Group not found");
 
-  return await this.groupRepo.save(group);
-}
+    group.repoUrl = body.repoUrl;
+    group.githubUsernames = body.githubUsernames;
 
-
-async checkPerformance(groupId: number) {
-  const group = await this.groupRepo.findOne({ where: { id: groupId } });
-
-  if (!group || !group.repoUrl) {
-    throw new Error("Repo missing");
+    return await this.groupRepo.save(group);
   }
 
 
-  const parts = group.repoUrl.split("github.com/")[1];
-  const [owner, repo] = parts.split("/");
+  async checkPerformance(groupId: number) {
+    const group = await this.groupRepo.findOne({ where: { id: groupId } });
 
-  const res = await axios.get(
-    `https://api.github.com/repos/${owner}/${repo}/commits`
-  );
-
-  const commits = res.data;
-  const counts: any = {};
-  group.githubUsernames.forEach((u) => (counts[u] = 0));
-
-  
-  commits.forEach((c) => {
-    const user = c.author?.login;
-    if (counts[user] !== undefined) {
-      counts[user]++;
+    if (!group || !group.repoUrl) {
+      throw new Error("Repo missing");
     }
-  });
 
 
-  group.totalCommits = commits.length;
-  group.individualCommits = counts;
+    const parts = group.repoUrl.split("github.com/")[1];
+    const [owner, repo] = parts.split("/");
 
-  return await this.groupRepo.save(group);
-}
+    const res = await axios.get(
+      `https://api.github.com/repos/${owner}/${repo}/commits`
+    );
+
+    const commits = res.data;
+    const counts: any = {};
+    group.githubUsernames.forEach((u) => (counts[u] = 0));
 
 
-async getGroupByStudentId(studentId: string) {
-  const numericId = parseInt(studentId);
-  const group = await this.groupRepo
-    .createQueryBuilder('grp')
-    .leftJoinAndSelect('grp.proposal', 'proposal')
-    .where('grp.leadStudentId = :numericId OR grp."studentRegs"::jsonb ? :studentId', { 
-      numericId, 
-      studentId 
-    })
-    .getOne();
+    commits.forEach((c) => {
+      const user = c.author?.login;
+      if (counts[user] !== undefined) {
+        counts[user]++;
+      }
+    });
 
-  if (!group) {
-    throw new NotFoundException(`Group for student ${studentId} not found`);
+
+    group.totalCommits = commits.length;
+    group.individualCommits = counts;
+
+    return await this.groupRepo.save(group);
   }
 
-  return {
-    id: group.id,
-    name: `Group ${group.id}`,
-    proposal: { 
-      title: group.proposal?.title || 'No Title' 
-    },
-    members: group.teamMembers || []
-  };
-}
 
-async getGroupsForSupervisor(supervisorId: number): Promise<Group[]> {
-  const committees = await this.committeeRepo
-    .createQueryBuilder("committee")
-    .innerJoin("committee_members", "cm", "cm.committee_id = committee.id")
-    .where("cm.supervisor_id = :id", { id: supervisorId })
-    .getMany();
+  // =========================================================================
+  // getGroupByStudentId — Leader AUR Member dono ke liye kaam karta hai
+  // Fix: Student ID se regNo nikalo, phir studentRegs JSON array mein match karo
+  // =========================================================================
+  async getGroupByStudentId(studentId: string) {
+    const numericId = parseInt(studentId);
 
-  if (committees.length === 0) return [];
+    // Step 1: Pehle leadStudentId se try karo (fast path for leader)
+    let group = await this.groupRepo
+      .createQueryBuilder('grp')
+      .leftJoinAndSelect('grp.proposal', 'proposal')
+      .where('grp.leadStudentId = :numericId', { numericId })
+      .getOne();
 
-  const committeeIds = committees.map(c => c.id);
+    // Step 2: Agar leader nahi hai, student ka regNo dhundho aur studentRegs mein check karo
+    if (!group) {
+      const student = await this.studentRepo.findOne({ where: { id: numericId } });
+      if (student && student.regNo) {
+        group = await this.groupRepo
+          .createQueryBuilder('grp')
+          .leftJoinAndSelect('grp.proposal', 'proposal')
+          .where(`grp."studentRegs"::jsonb @> :regArr::jsonb`, {
+            regArr: JSON.stringify([student.regNo]),
+          })
+          .getOne();
+      }
+    }
 
-  return await this.groupRepo.find({
-    where: { 
-      committeeId: In(committeeIds) 
-    },
-    relations: ['proposal', 'supervisor', 'committee'],
-  });
-}
+    if (!group) {
+      throw new NotFoundException(`Group for student ${studentId} not found`);
+    }
 
-async getRepoUrl(groupId: number): Promise<{ repoUrl: string | null }> {
+    return {
+      id: group.id,
+      name: `Group ${group.id}`,
+      leadStudentId: group.leadStudentId,
+      supervisorId: group.supervisorId,
+      proposal: {
+        title: group.proposal?.title || 'No Title'
+      },
+      members: group.teamMembers || [],
+      studentRegs: group.studentRegs || [],
+    };
+  }
+
+  async getGroupsForSupervisor(supervisorId: number): Promise<Group[]> {
+    const committees = await this.committeeRepo
+      .createQueryBuilder("committee")
+      .innerJoin("committee_members", "cm", "cm.committee_id = committee.id")
+      .where("cm.supervisor_id = :id", { id: supervisorId })
+      .getMany();
+
+    if (committees.length === 0) return [];
+
+    const committeeIds = committees.map(c => c.id);
+
+    return await this.groupRepo.find({
+      where: {
+        committeeId: In(committeeIds)
+      },
+      relations: ['proposal', 'supervisor', 'committee'],
+    });
+  }
+
+  async getRepoUrl(groupId: number): Promise<{ repoUrl: string | null }> {
     const group = await this.groupRepo.findOne({
       where: { id: groupId },
-      select: ['repoUrl'], 
+      select: ['repoUrl'],
     });
     if (!group) {
       throw new NotFoundException(`Group with ID ${groupId} not found`);

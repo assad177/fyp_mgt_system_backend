@@ -6,7 +6,7 @@ import { Repository } from 'typeorm';
 import { Proposal } from './entities/proposal.entity';
 import { ExistingProject } from './entities/existing-project.entity';
 import { GeminiService } from 'src/gemini/gemini.service';
-
+import { Student } from 'src/students/entities/student.entity';
 @Injectable()
 export class ProposalService {
   constructor(
@@ -17,6 +17,9 @@ export class ProposalService {
     private readonly existingProjectRepo: Repository<ExistingProject>,
 
     private readonly gemini: GeminiService,
+    @InjectRepository(Student)
+    private readonly studentRepo: Repository<Student>,
+  
   ) {}
 
   async checkSimilarity(
@@ -92,10 +95,20 @@ export class ProposalService {
     };
   }
 
-  async getStudentProposal(studentId: number) {
-    return this.repo.findOne({
+ async getStudentProposal(studentId: number) {
+    // Step 1: Try direct match (Leader student)
+    const directMatch = await this.repo.findOne({
       where: { studentId },
       order: { createdAt: 'DESC' },
+    });
+    if (directMatch) return directMatch;
+
+    // Step 2: Member student — student record se proposalId uthaao
+    const student = await this.studentRepo.findOne({ where: { id: studentId } });
+    if (!student || !student.proposalId) return null;
+
+    return this.repo.findOne({
+      where: { id: student.proposalId },
     });
   }
 

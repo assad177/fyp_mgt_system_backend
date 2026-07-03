@@ -5,10 +5,11 @@ import { ProposalService } from './proposal.service';
 import { Proposal } from './entities/proposal.entity';
 import { ExistingProject } from './entities/existing-project.entity';
 import { GeminiModule } from '../gemini/gemini.module';
+import { Student } from 'src/students/entities/student.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Proposal, ExistingProject]),
+    TypeOrmModule.forFeature([Proposal, ExistingProject,Student]),
     GeminiModule,
   ],
   controllers: [ProposalController],

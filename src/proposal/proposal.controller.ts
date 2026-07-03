@@ -14,10 +14,10 @@ export class ProposalController {
 
 
 
-  @Get('student/:studentId')
+ @Get('student/:studentId')
   getStudentProposal(@Param('studentId') studentId: string) {
     return this.proposalservice.getStudentProposal(parseInt(studentId));
-  }
+  }   
 
  
   @Post('check-similarity')
