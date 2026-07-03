@@ -21,11 +21,7 @@ async function bootstrap() {
   });
 
   console.log('the server is running on port' + (process.env.PORT?? 3000));
-console.log({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key_length: process.env.CLOUDINARY_API_KEY?.length,
-  api_secret_length: process.env.CLOUDINARY_API_SECRET?.length,
-});
+
  
 
 }

@@ -122,4 +122,10 @@ async uploadDocument(
   ) {
     return await this.evaluationService.getStudentMarksByPhase(groupId, phaseId);
   }
+
+
+  @Get('dashboard/:studentId')
+  async getStudentDashboard(@Param('studentId', ParseIntPipe) studentId: number) {
+    return await this.evaluationService.getStudentDashboard(studentId);
+  }
 }
