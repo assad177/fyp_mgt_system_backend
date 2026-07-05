@@ -16,7 +16,6 @@ export class SupervisorRequest {
   @PrimaryGeneratedColumn()
   id: number;
 
-  // ================= STUDENT =================
   @ManyToOne(() => Student, { eager: true })
   @JoinColumn({ name: 'student_id' })
   student: Student;
@@ -24,7 +23,6 @@ export class SupervisorRequest {
   @Column({ name: 'student_id' })
   studentId: number;
 
-  // ================= PROPOSAL =================
   @ManyToOne(() => Proposal, { eager: true })
   @JoinColumn({ name: 'proposal_id' })
   proposal: Proposal;
@@ -32,7 +30,7 @@ export class SupervisorRequest {
   @Column({ name: 'proposal_id' })
   proposalId: number;
 
-  // ================= SUPERVISOR =================
+ 
   @ManyToOne(() => Supervisor, { eager: true })
   @JoinColumn({ name: 'supervisor_id' })
   supervisor: Supervisor;
@@ -40,14 +38,14 @@ export class SupervisorRequest {
   @Column({ name: 'supervisor_id' })
   supervisorId: number;
 
-  // ================= TEAM MEMBERS =================
+
   @Column('json', { nullable: true })
   teamMembers: {
     name: string;
     regNo?: string;
   }[];
 
-  // ================= STATUS =================
+
   @Column({ default: 'pending' })
   status: 'pending' | 'accepted' | 'rejected';
 

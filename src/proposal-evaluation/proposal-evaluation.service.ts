@@ -144,28 +144,51 @@ async submitToPec(proposalData: {
 
 // 4. PEC SUPERVISOR: FETCH ALL SUBMITTED PROPOSALS FOR THE COMMITTEE
 // =========================================================================
-async getSubmittedProposalsForPec(supervisorId: number) {
-  const supervisor = await this.supervisorRepo.findOne({
-    where: { id: supervisorId },
-    relations: ['proposalCommittee'],
-  });
 
-  if (!supervisor) throw new NotFoundException('Supervisor not found');
-  
- 
-  if (!supervisor.proposalCommittee) {
-    throw new BadRequestException('You are not assigned to the PEC committee yet.');
+  async getSubmittedProposalsForPec(supervisorId: number) {
+    // 1. Supervisor aur uski committee find karein
+    const supervisor = await this.supervisorRepo.findOne({
+      where: { id: supervisorId },
+      relations: ['proposalCommittee'],
+    });
+    if (!supervisor) throw new NotFoundException('Supervisor not found');
+    if (!supervisor.proposalCommittee) {
+      throw new BadRequestException('You are not assigned to the PEC committee yet.');
+    }
+    const pecDomain = supervisor.proposalCommittee.domain;
+    // 2. Agar committee ka domain "General" hai
+    if (pecDomain === 'General') {
+      // Saari committees ke active domains nikal lein (except General)
+      const allCommittees = await this.pecRepo.find();
+      const activeDomains = allCommittees
+        .map(c => c.domain)
+        .filter(d => d && d !== 'General');
+      const qb = this.proposalRepo.createQueryBuilder('proposal')
+        .leftJoinAndSelect('proposal.student', 'student')
+        .leftJoinAndSelect('student.user', 'user')
+        .where('proposal.status = :status', { status: 'submitted' });
+      // Jo domains active hain, unki proposals ko chhorh kar baqi sab General ko bhej dein
+      if (activeDomains.length > 0) {
+        qb.andWhere('(proposal.domain = :gen OR proposal.domain IS NULL OR proposal.domain NOT IN (:...activeDomains))', { 
+          gen: 'General', 
+          activeDomains 
+        });
+      }
+      return qb.orderBy('proposal.createdAt', 'DESC').getMany();
+    } 
+    // 3. Agar committee kisi specific domain ki hai (e.g., "Web", "AI")
+    else {
+      return this.proposalRepo.find({
+        where: { 
+          status: 'submitted',
+          domain: pecDomain // 👈 Sirf isi domain ki proposals filter hongi
+        },
+        relations: ['student', 'student.user'],
+        order: { createdAt: 'DESC' },
+      });
+    }
   }
 
-  // 3. ✨ MAIN UPDATE: Domain filter hata diya, ab saare submitted proposals load honge
-  return this.proposalRepo.find({
-    where: { 
-      status: 'submitted' // 👈 Sirf status check hoga, domain ka koi chakkar nahi
-    },
-    relations: ['student', 'student.user'],
-    order: { createdAt: 'DESC' }, // Naye proposals pehle dikhenge
-  });
-}
 
   
   async approveProposal(id: number, feedback?: string) {

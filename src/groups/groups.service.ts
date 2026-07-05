@@ -74,21 +74,16 @@ export class GroupsService {
   }
 
 
-  // =========================================================================
-  // getGroupByStudentId — Leader AUR Member dono ke liye kaam karta hai
-  // Fix: Student ID se regNo nikalo, phir studentRegs JSON array mein match karo
-  // =========================================================================
+
   async getGroupByStudentId(studentId: string) {
     const numericId = parseInt(studentId);
-
-    // Step 1: Pehle leadStudentId se try karo (fast path for leader)
     let group = await this.groupRepo
       .createQueryBuilder('grp')
       .leftJoinAndSelect('grp.proposal', 'proposal')
       .where('grp.leadStudentId = :numericId', { numericId })
       .getOne();
 
-    // Step 2: Agar leader nahi hai, student ka regNo dhundho aur studentRegs mein check karo
+
     if (!group) {
       const student = await this.studentRepo.findOne({ where: { id: numericId } });
       if (student && student.regNo) {

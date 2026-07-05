@@ -4,6 +4,7 @@ import { SupervisorService } from './supervisor.service';
 @Controller('supervisor')
 export class SupervisorController {
   constructor(private readonly service: SupervisorService) {}
+
 @Get('all')
 getAllSupervisors(@Query('domain') domain: string) {
   console.log('supervisor api called,',domain);
@@ -13,6 +14,7 @@ getAllSupervisors(@Query('domain') domain: string) {
   async getStudentsForSearch(@Query('name') name?: string) {
     return await this.service.searchStudents(name);
   }
+  
 @Post('send-supervisor-request')
 sendSupervisorRequest(@Body() body: any) {
   console.log(body)

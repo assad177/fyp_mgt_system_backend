@@ -4,9 +4,6 @@ import { clearScreenDown } from 'readline';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-// 172.20.62.106
-
-
   app.enableCors({
     origin: '*',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
@@ -14,16 +11,11 @@ async function bootstrap() {
     credentials: false,
   });
 
-  await app.listen(3000, '0.0.0.0', () => {
+  await app.listen(3000,'0.0.0.0', () => {
     console.log('Server running on port 3000');
-
-
   });
 
-  console.log('the server is running on port' + (process.env.PORT?? 3000));
-
- 
-
+  console.log('the server is running on port' + (process.env.PORT ?? 3000));
 }
 bootstrap();
 

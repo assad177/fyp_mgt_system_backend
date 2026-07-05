@@ -3,7 +3,7 @@ import {
   Post,
   UploadedFile,
   UseInterceptors,
-  Body,Get
+  Body, Get
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FypOfficeService } from './fyp-office.service';
@@ -11,8 +11,7 @@ import { FypOfficeService } from './fyp-office.service';
 @Controller('fyp-office')
 export class FypOfficeController {
   constructor(private readonly service: FypOfficeService) { }
-
-
+  
   @Post('save-proposal')
   @UseInterceptors(FileInterceptor('file'))
   uploadExisting(
