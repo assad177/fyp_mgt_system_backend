@@ -2,7 +2,7 @@ import { Entity, PrimaryColumn, ManyToOne, JoinColumn } from "typeorm";
 import { Committee } from "./committee.entity";
 import { Supervisor } from "src/supervisor/entities/supervisor.entity";
 
-@Entity("committee_members") // Database wale table ka naam
+@Entity("committee_members") 
 export class CommitteeMember {
 
   @PrimaryColumn()

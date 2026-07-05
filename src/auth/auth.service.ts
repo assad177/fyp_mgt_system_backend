@@ -2,13 +2,18 @@ import {
   Injectable,
   UnauthorizedException,
   ConflictException,
-  BadRequestException,
+  BadRequestException,NotFoundException
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { StudentsService } from '../students/students.service';
 import { SupervisorService } from '../supervisor/supervisor.service';
 import * as bcrypt from 'bcrypt';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Supervisor } from 'src/supervisor/entities/supervisor.entity';
+import { Repository } from 'typeorm';
+import { Student } from 'src/students/entities/student.entity';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -17,6 +22,11 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly studentsService: StudentsService,
     private readonly supervisorService: SupervisorService, 
+    @InjectRepository(Supervisor) private readonly supervisorRepo:Repository<Supervisor>,
+    @InjectRepository(Student) private readonly studentRepo:Repository<Student>,
+    @InjectRepository(User) private readonly usersRepositoty:Repository<User>,
+
+
   ) {}
 
   async signup(data: {
@@ -24,13 +34,9 @@ export class AuthService {
     email: string;
     password: string;
     role: 'student' | 'supervisor' | 'pec' | 'fyp_office';
-
-    // student
     regNo?: string;
     fatherName?: string;
     department?: string;
-
-    // supervisor
     expertise?: string[];
     designation?: string;
   }) {
@@ -45,8 +51,6 @@ export class AuthService {
     }
 
     const hashedPassword = await bcrypt.hash(data.password, 10);
-
-    // 1️⃣ CREATE USER (COMMON)
     const user = await this.usersService.create({
       name: data.name,
       email: data.email,
@@ -147,5 +151,47 @@ export class AuthService {
       user: payload,
       message: 'Login successful',
     };
+  }
+
+ async searchUser(role: string, query: string) {
+    if (role === 'student') {
+      // Query is Registration Number
+      const student = await this.studentsService.findByRegNo(query);
+      if (!student || !student.user) {
+        throw new NotFoundException('Student not found with this Registration Number');
+      }
+      return { 
+        id: student.user.id, 
+        name: student.user.name, 
+        email: student.user.email, 
+        regNo: student.regNo, 
+        department: student.department 
+      };
+    } else if (role === 'supervisor') {
+      // Query is Email
+      const user = await this.usersService.findByEmail(query);
+      if (!user || user.role !== 'supervisor') {
+        throw new NotFoundException('Supervisor not found with this Email');
+      }
+      return { 
+        id: user.id, 
+        name: user.name, 
+        email: user.email, 
+      };
+    }
+    throw new BadRequestException('Invalid role provided');
+  }
+  async adminResetPassword(email: string, newPassword: string) {
+    // 1. Check if user exists via UsersService
+    const user = await this.usersService.findByEmail(email);
+    if (!user) {
+      throw new NotFoundException(`No user found with email: ${email}`);
+    }
+    // 2. Hash the new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    
+    // 3. Update the password via UsersService
+    await this.usersService.updatePassword(email, hashedPassword);
+    return { success: true, message: 'Password reset successfully' };
   }
 }

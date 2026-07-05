@@ -14,7 +14,7 @@ export class ProposalEvaluationCommittee {
   id: number;
 
   @Column({ type: 'varchar', length: 100,nullable:true })
-  name: string; // e.g., "AI Proposal Evaluation Committee"
+  name: string;
 
   @Column({ type: 'varchar', length: 50 ,nullable:true})
   domain: string; // e.g., "AI", "Web", "Mobile", "Cybersecurity"

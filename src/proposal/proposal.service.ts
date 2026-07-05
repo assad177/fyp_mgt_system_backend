@@ -96,14 +96,13 @@ export class ProposalService {
   }
 
  async getStudentProposal(studentId: number) {
-    // Step 1: Try direct match (Leader student)
+
     const directMatch = await this.repo.findOne({
       where: { studentId },
       order: { createdAt: 'DESC' },
     });
     if (directMatch) return directMatch;
 
-    // Step 2: Member student — student record se proposalId uthaao
     const student = await this.studentRepo.findOne({ where: { id: studentId } });
     if (!student || !student.proposalId) return null;
 
@@ -150,9 +149,7 @@ export class ProposalService {
     }
   }
 
-  // ================================
-  // OPTIMIZED SIMILARITY SEARCH (DATABASE LEVEL + CALIBRATION)
-  // ================================
+
   private async findSimilarProjects(studentEmb: any) {
     // pgvector format ke liye arrays ko string mein convert karna zaroori hai '[0.1, 0.2, ...]'
     const titleStr = `[${studentEmb.title_embedding.join(',')}]`;

@@ -11,16 +11,16 @@ export class ChatService {
     private messageRepo: Repository<Message>,
   ) {}
 
-  // Message save karne ka smart method
+
   async saveMessage(data: { groupId: number; senderId: number; senderName: string; senderRole: string; message: string }) {
     const message = this.messageRepo.create(data);
     return await this.messageRepo.save(message);
   }
 
-  // 🛑 Old: getMessages(roomId: string) -> ✨ New: getMessages(groupId: number)
+  
   async getMessages(groupId: number) {
     return this.messageRepo.find({
-      where: { groupId }, // Ab direct groupId column par fast indexing se search hoga
+      where: { groupId }, 
       order: { createdAt: 'ASC' }, // Taake messages chronological order (line-by-line) mein load hon
     });
   }

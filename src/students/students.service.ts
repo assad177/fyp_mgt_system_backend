@@ -136,12 +136,13 @@ async getStudentDashboard(studentId: number) {
     throw new NotFoundException('Student record not found.');
   }
 
-  // Step 2: Group ID dhundho (leader ya member dono case)
+  // Step 2: Group ID dhundho
   let groupId: number | null = null;
   const leaderGroup = await this.groupRepo.findOne({
     where: { leadStudentId: studentId },
     select: ['id'],
   });
+  
   if (leaderGroup) {
     groupId = leaderGroup.id;
   } else if (student.regNo) {
@@ -155,6 +156,19 @@ async getStudentDashboard(studentId: number) {
     if (memberGroup) groupId = memberGroup.id;
   }
 
+  // --- NAYA LOGIC: Supervisor Name Fetch karna ---
+  let supervisorName = 'Not Assigned';
+  if (groupId) {
+    const groupWithSupervisor = await this.groupRepo.findOne({
+      where: { id: groupId },
+      relations: ['supervisor', 'supervisor.user'], // Relations add kiye
+    });
+    
+    if (groupWithSupervisor?.supervisor?.user?.name) {
+      supervisorName = groupWithSupervisor.supervisor.user.name;
+    }
+  }
+
   // Step 3: Proposal check
   if (!student.proposalId) {
     return {
@@ -162,6 +176,7 @@ async getStudentDashboard(studentId: number) {
       message: 'Show "Submit Proposal" screen to this student.',
       data: null,
       groupId,
+      supervisorName, // Yahan bhi add kar diya
     };
   }
 
@@ -175,6 +190,7 @@ async getStudentDashboard(studentId: number) {
     message: 'Show "Proposal Status/Details" screen to this student.',
     data: proposal,
     groupId,
+    supervisorName, // Yahan bhi add kar diya
   };
 }
 }

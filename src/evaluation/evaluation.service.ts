@@ -128,6 +128,18 @@ export class EvaluationService {
 
   private async upsertScores(groupId: number, evaluatorId: number, scores: any[]) {
     for (const item of scores) {
+      
+      // 👇 --- NEW LOGIC: Live Rubric aur uski Phase ko fetch karke data "Freeze" karna ---
+      const liveRubric = await this.rubricRepo.findOne({
+        where: { id: item.rubricId },
+        relations: ['phase'], // Phase ki details (weightage) nikalne ke liye relation add kiya
+      });
+
+      if (!liveRubric) {
+        throw new BadRequestException(`Rubric with ID ${item.rubricId} not found.`);
+      }
+      // 👆 -----------------------------------------------------------------------------
+
       const existing = await this.evalRepo.findOne({
         where: { group: { id: groupId }, rubric: { id: item.rubricId }, evaluator: { id: evaluatorId } },
       });
@@ -135,6 +147,13 @@ export class EvaluationService {
       if (existing) {
         existing.marks = item.marks;
         existing.feedback = item.feedback || '';
+        
+        // Snapshot data ko update/freeze karna
+        existing.rubricTitleSnapshot = liveRubric.title;
+        existing.rubricMaxMarksSnapshot = liveRubric.maxMarks;
+        existing.phaseNameSnapshot = liveRubric.phase?.name || 'Unknown Phase';
+        existing.phaseWeightSnapshot = liveRubric.phase?.weight || 0;
+
         await this.evalRepo.save(existing);
       } else {
         const newScore = this.evalRepo.create({
@@ -143,6 +162,12 @@ export class EvaluationService {
           evaluator: { id: evaluatorId } as any,
           marks: item.marks,
           feedback: item.feedback,
+
+          // Naya record bante hi Snapshot columns mein data Lock/Freeze kar dena
+          rubricTitleSnapshot: liveRubric.title,
+          rubricMaxMarksSnapshot: liveRubric.maxMarks,
+          phaseNameSnapshot: liveRubric.phase?.name || 'Unknown Phase',
+          phaseWeightSnapshot: liveRubric.phase?.weight || 0,
         });
         await this.evalRepo.save(newScore);
       }
@@ -371,65 +396,91 @@ private async checkAiContent(text: string): Promise<{ score: number; summary: st
     summary: `Real-time AI Scan: ${finalAiPercentage}% AI-generated content detected.`,
     isSimulated: false,
   };
-}
-
+} 
  
-  async getStudentMarksByPhase(groupId: number, phaseId: number) {
-    try {
-      const [phase, scores, status] = await Promise.all([
-        this.phaseRepo.findOne({ where: { id: phaseId }, relations: ['rubrics'] }),
-        this.evalRepo.find({
-          where: {
-            group: { id: groupId },
-            rubric: { phase: { id: phaseId } },
-          },
-          relations: ['rubric', 'evaluator', 'evaluator.user'],
-          select: {
-            id: true,
-            marks: true,
-            feedback: true,
-            rubric: { id: true, maxMarks: true },
-            evaluator: { id: true, user: { id: true, name: true } },
-          },
-        }),
-        this.groupStatusRepo.findOne({ where: { groupId, phaseId } }),
-      ]);
+async getStudentMarksByPhase(groupId: number, phaseId: number) {
+  try {
+    const [phase, scores, status] = await Promise.all([
+      this.phaseRepo.findOne({ where: { id: phaseId }, relations: ['rubrics'] }),
+      this.evalRepo.find({
+        where: {
+          group: { id: groupId },
+          rubric: { phase: { id: phaseId } },
+        },
+        relations: ['rubric', 'evaluator', 'evaluator.user'],
+        select: {
+          id: true,
+          marks: true,
+          feedback: true,
+          // 👇 Snapshot columns ko explicitly database se mangwana zaroori hai
+          rubricTitleSnapshot: true,
+          rubricMaxMarksSnapshot: true,
+          phaseNameSnapshot: true,
+          phaseWeightSnapshot: true,
+          rubric: { id: true, maxMarks: true },
+          evaluator: { id: true, user: { id: true, name: true } },
+        },
+      }),
+      this.groupStatusRepo.findOne({ where: { groupId, phaseId } }),
+    ]);
 
-      if (!phase) throw new NotFoundException('Phase not found');
+    if (!phase) throw new NotFoundException('Phase not found');
 
-      if (!scores || scores.length === 0) {
-        return {
-          success: true,
-          message: 'Is phase ke marks abhi upload nahi hue.',
-          data: [],
-        };
-      }
-
-      const phaseWeight = phase.weight;
-      const totalMaxMarks = phase.rubrics.reduce((sum, r) => sum + r.maxMarks, 0);
-      const totalObtainedMarks = scores.reduce((sum, s) => sum + s.marks, 0)
-      const solidMarksObtained = status?.isLocked
-        ? Number(status.obtainedWeightedScore)
-        : totalMaxMarks > 0
-          ? parseFloat(((totalObtainedMarks / totalMaxMarks) * phaseWeight).toFixed(2))
-          : 0;
-
+    if (!scores || scores.length === 0) {
       return {
         success: true,
-        message: 'Marks fetched and calculated successfully',
-        phaseId,
-        groupId,
-        phaseWeight,
-        totalRawObtained: totalObtainedMarks,
-        totalRawMax: totalMaxMarks,
-        solidMarksObtained,
-        data: scores,
+        message: 'Is phase ke marks abhi upload nahi hue.',
+        data: [],
       };
-    } catch (error) {
-      if (error instanceof NotFoundException) throw error;
-      throw new Error('Marks fetch karte waqt server error aaya.');
     }
+
+    // 👇 --- SMART SNAPSHOT CALCULATION LOGIC ---
+    
+    // 1. Phase Weightage: Pehle snapshot se try karo, agar nahi hai (purana data) toh live se lo
+    let phaseWeight = phase.weight;
+    const scoreWithSnapshot = scores.find(s => s.phaseWeightSnapshot != null);
+    if (scoreWithSnapshot) {
+      phaseWeight = scoreWithSnapshot.phaseWeightSnapshot;
+    }
+
+    // 2. Total Max Marks: Har rubric ko check karo, agar uska score locked hai toh uski
+    // snapshot maxMarks lo, warna live rubric table ki maxMarks lo.
+    let totalMaxMarks = 0;
+    phase.rubrics.forEach(liveRubric => {
+      const snapshottedScore = scores.find(s => s.rubric.id === liveRubric.id && s.rubricMaxMarksSnapshot != null);
+      if (snapshottedScore) {
+        totalMaxMarks += snapshottedScore.rubricMaxMarksSnapshot;
+      } else {
+        totalMaxMarks += liveRubric.maxMarks;
+      }
+    });
+
+    // 3. Total Obtained Marks: Yeh wahi basic sum rahega
+    const totalObtainedMarks = scores.reduce((sum, s) => sum + s.marks, 0);
+
+    // 4. Solid/Weighted Marks Calculation
+    const solidMarksObtained = status?.isLocked
+      ? Number(status.obtainedWeightedScore) // Agar admin ne pehle se lock kar diya tha
+      : totalMaxMarks > 0
+        ? parseFloat(((totalObtainedMarks / totalMaxMarks) * phaseWeight).toFixed(2))
+        : 0;
+
+    return {
+      success: true,
+      message: 'Marks fetched and calculated successfully',
+      phaseId,
+      groupId,
+      phaseWeight, // Frontend ko ab locked weightage jayegi!
+      totalRawObtained: totalObtainedMarks,
+      totalRawMax: totalMaxMarks,
+      solidMarksObtained,
+      data: scores,
+    };
+  } catch (error) {
+    if (error instanceof NotFoundException) throw error;
+    throw new Error('Marks fetch karte waqt server error aaya.');
   }
+}
 
  async getStudentDashboard(studentId: number) {
     // STEP 1: Pehle student ka proposal dhundein (Lead ho ya Partner)

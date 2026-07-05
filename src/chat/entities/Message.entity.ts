@@ -1,4 +1,4 @@
-// src/chat/entities/message.entity.ts
+
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -15,16 +15,15 @@ export class Message {
   @PrimaryGeneratedColumn()
   id: number;
 
-  // 🛑 Old roomId string replaced with proper Group relation
   @Column()
   groupId: number; 
-
+  
   @ManyToOne(() => Group, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'groupId' })
   group: Group;
 
   @Column()
-  senderId: number; // User Table ki ID (Student ya Supervisor)
+  senderId: number; // User Table  ID (Student or Supervisor)
 
   @Column()
   senderName: string;

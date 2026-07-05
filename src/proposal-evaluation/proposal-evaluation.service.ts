@@ -20,15 +20,11 @@ export class ProposalEvaluationService {
     private readonly studentRepo: Repository<Student>,
   ) {}
 
-  // =========================================================================
-  // 1. STUDENT: SUBMIT PROPOSAL (Aapka Original Logic - Unchanged)
-  // =========================================================================
- // src/proposal-evaluation/proposal-evaluation.service.ts
 
 async submitToPec(proposalData: {
   title: string;
   description: string;
-  domain?: string; // 👈 Isko optional (?) kar diya taake agar frontend na bhi bheje toh error na aaye
+  domain?: string;
   studentId: number;
   memberRegNos: string[];
   titleEmbedding: number[];
@@ -41,7 +37,6 @@ async submitToPec(proposalData: {
   if (!creator) {
     throw new NotFoundException('Submitting student record not found.');
   }
-
   // 2. Fetch all group members
   const allMembers = await this.studentRepo.find({
     where: [
@@ -49,40 +44,42 @@ async submitToPec(proposalData: {
       { regNo: In(proposalData.memberRegNos || []) }
     ]
   });
-
-  // 3. Validation: Check if anyone is already locked
+  // 3. Validation: Check if anyone is already locked (BUT allow if previous proposal was rejected)
   for (const member of allMembers) {
     if (member.proposalId) {
-      throw new BadRequestException(
-        `Student with Reg No '${member.regNo}' already has a proposal submitted.`
-      );
+      // Check existing proposal status
+      const existingProposal = await this.proposalRepo.findOne({ where: { id: member.proposalId } });
+      
+      // ✨ NAYA LOGIC: Agar existing proposal 'rejected' nahi hai, tabhi block karo
+      if (existingProposal && existingProposal.status !== 'rejected') {
+        throw new BadRequestException(
+          `Student with Reg No '${member.regNo}' already has an active proposal submitted.`
+        );
+      }
     }
   }
-
   // 4. Save Proposal (Domain filter bypassed)
   const proposal = this.proposalRepo.create({
     title: proposalData.title,
     description: proposalData.description,
-    domain: proposalData.domain || 'General', // 👈 Agar frontend se domain nahi aayega, toh automatic 'General' save ho jayega
+    domain: proposalData.domain || 'General',
     studentId: proposalData.studentId,
     titleEmbedding: proposalData.titleEmbedding,
     scopeEmbedding: proposalData.scopeEmbedding,
     modulesEmbedding: proposalData.modulesEmbedding,
     highestSimilarity: proposalData.highestSimilarity,
     fileUrl: '',
-    status: 'submitted', // 👈 Yeh status ab direct Committee 1 ko show hoga
+    status: 'submitted', 
     supervisorStatus: 'pending'
   });
-
   const savedProposal = await this.proposalRepo.save(proposal);
-
   // 5. Locking Mechanism (Teeno students ko bind karna)
+  // Yeh purane rejected proposal ki ID ko over-write kar dega automatically
   const memberIds = allMembers.map((m) => m.id);
   await this.studentRepo.update(
     { id: In(memberIds) },
     { proposalId: savedProposal.id }
   );
-
   return {
     success: true,
     message: 'Proposal directly submitted to PEC Committee pool!',
@@ -90,7 +87,6 @@ async submitToPec(proposalData: {
   };
 }
 
-  
   async createPec(data: { name: string; domain: string; supervisorIds?: number[] }) {
     // New committee record insert karein
     const committee = this.pecRepo.create({
@@ -113,7 +109,6 @@ async submitToPec(proposalData: {
     });
   }
 
-  
   async updatePec(id: number, data: { name?: string; domain?: string; supervisorIds?: number[] }) {
     const pec = await this.pecRepo.findOne({ where: { id } });
     if (!pec) throw new NotFoundException('Proposal Evaluation Committee (PEC) not found');
@@ -146,11 +141,10 @@ async submitToPec(proposalData: {
   }
 
 
-// =========================================================================
+
 // 4. PEC SUPERVISOR: FETCH ALL SUBMITTED PROPOSALS FOR THE COMMITTEE
 // =========================================================================
 async getSubmittedProposalsForPec(supervisorId: number) {
-  // 1. Pehle check karein ke supervisor database mein hai ya nahi
   const supervisor = await this.supervisorRepo.findOne({
     where: { id: supervisorId },
     relations: ['proposalCommittee'],
@@ -158,7 +152,7 @@ async getSubmittedProposalsForPec(supervisorId: number) {
 
   if (!supervisor) throw new NotFoundException('Supervisor not found');
   
-  // 2. Security Check: Kya supervisor committee ka member hai?
+ 
   if (!supervisor.proposalCommittee) {
     throw new BadRequestException('You are not assigned to the PEC committee yet.');
   }

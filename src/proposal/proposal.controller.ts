@@ -12,14 +12,11 @@ export class ProposalController {
     return this.proposalservice.fetchAllProposals();
   }
 
-
-
  @Get('student/:studentId')
   getStudentProposal(@Param('studentId') studentId: string) {
     return this.proposalservice.getStudentProposal(parseInt(studentId));
   }   
 
- 
   @Post('check-similarity')
   @UseInterceptors(FileInterceptor('file'))
   async checkSimilarity(
@@ -58,7 +55,7 @@ export class ProposalController {
     return this.proposalservice.enhanceProposalWithGemini(body);
   }
 
-  // Submit proposal to PEC - receives full proposal data and saves to DB with status='submitted'
+ 
 }
 
 

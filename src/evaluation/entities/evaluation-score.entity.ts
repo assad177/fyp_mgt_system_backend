@@ -14,6 +14,20 @@ export class EvaluationScore {
   @Column({ type: 'text', nullable: true })
   feedback: string;
 
+  // 👇 --- SNAPSHOT COLUMNS (For Data Freeze) --- 👇
+  @Column({ type: 'varchar', nullable: true })
+  rubricTitleSnapshot: string;
+
+  @Column({ type: 'int', nullable: true })
+  rubricMaxMarksSnapshot: number;
+
+  @Column({ type: 'varchar', nullable: true })
+  phaseNameSnapshot: string;
+
+  @Column({ type: 'float', nullable: true })
+  phaseWeightSnapshot: number;
+  // 👆 ------------------------------------------- 👆
+
   @ManyToOne(() => Rubric)
   rubric: Rubric;
 

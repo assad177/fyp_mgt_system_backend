@@ -42,7 +42,7 @@ handleJoinRoom(@MessageBody() data: any, @ConnectedSocket() client: Socket) {
   console.log(`👥 Joined: ${roomName}`);
 }
 
-  // 💬 2. REAL-TIME SEND MESSAGE LOGIC
+  // REAL-TIME SEND MESSAGE LOGIC
   @SubscribeMessage('sendMessage')
   async handleSendMessage(
     @MessageBody() data: { groupId: number; senderId: number; senderName: string; senderRole: string; message: string },
@@ -82,7 +82,6 @@ handleJoinRoom(@MessageBody() data: any, @ConnectedSocket() client: Socket) {
   }
 
   private getRoomName(groupId: any): string {
-  // Isse hamesha "group_1" ya "group_2" format milega
   return `group_${groupId}`;
 }
 }
