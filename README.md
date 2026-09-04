@@ -1,4 +1,4 @@
-# 🎓 FYP Evaluation & Assessment Management System
+# 🎓 FYP Evaluation & Assessment Management System(Backend Setup)
 
 A comprehensive **NestJS-based Final Year Project (FYP) Evaluation & Assessment Management System** that streamlines project submission, supervisor allocation, committee reviews, evaluation workflows, document management, and AI-powered proposal analysis.
 
