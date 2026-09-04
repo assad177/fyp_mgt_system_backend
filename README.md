@@ -24,7 +24,7 @@
 - **Node.js** v18+ ([Download](https://nodejs.org/))
 - **PostgreSQL** v14+ ([Download](https://www.postgresql.org/))
 - **Git** ([Download](https://git-scm.com/))
-- **npm** or **yarn**
+- **npm** 
 
 ### 1. Clone Repository
 
