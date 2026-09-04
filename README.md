@@ -1,98 +1,254 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# FYP Evaluation & Assessment Management System - Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+> A comprehensive NestJS-based Final Year Project (FYP) evaluation management system with AI-powered analysis, real-time chat, and role-based dashboards.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+**Author:** Assad Wazeer 
 
-## Description
+## 🎯 Features Overview
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+✅ **Role-Based Access Control** - Admin, Supervisor, Student, Committee, External Evaluator  
+✅ **Dynamic Evaluation Phases** - Proposal, Mid, Progress, Final Defense  
+✅ **AI-Powered Analysis** - Gemini, OpenAI, Groq integration  
+✅ **Document Management** - Upload, parse, and analyze proposals  
+✅ **Real-Time Chat** - WebSocket-based messaging system  
+✅ **Email Notifications** - Gmail SMTP integration  
+✅ **Group Management** - Student group handling  
+✅ **Evaluation Tracking** - Score weightage and final result calculation  
+✅ **JWT Authentication** - Secure token-based auth  
 
-## Project setup
+---
 
-```bash
-$ npm install
-```
+## 🚀 Quick Start (5 Minutes)
 
-## Compile and run the project
+### Prerequisites
+- **Node.js** v18+ ([Download](https://nodejs.org/))
+- **PostgreSQL** v14+ ([Download](https://www.postgresql.org/))
+- **Git** ([Download](https://git-scm.com/))
+- **npm** or **yarn**
 
-```bash
-# development
-$ npm run start
+### 1. Clone Repository
 
-# watch mode
-$ npm run start:dev
+git clone <repo>
+cd <folder name>
 
-# production mode
-$ npm run start:prod
-```
+### 2. Install Dependencies
 
-## Run tests
+npm install
 
-```bash
-# unit tests
-$ npm run test
+### 3. Database Setup
 
-# e2e tests
-$ npm run test:e2e
+# Login to PostgreSQL
+sudo -u postgres psql
 
-# test coverage
-$ npm run test:cov
-```
+# Create user and database
+ALTER USER postgres WITH PASSWORD 'postgres';
+CREATE DATABASE fyp_evaluation;
+\q
 
-## Deployment
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+### 4. Environment Configuration
+# Create .env file
+nano .env
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+Paste this configuration:
+env
+# Database
+DB_HOST=localhost
+DB_PORT=5432
+DB_USERNAME=postgres
+DB_PASSWORD=postgres
+DB_NAME=fyp_evaluation
+DB_SYNCHRONIZE=false
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
+# Server
+PORT=3000
+NODE_ENV=development
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+# JWT Authentication
+JWT_SECRET=your_jwt_secret_key_here_min_32_chars
+JWT_EXPIRATION=1d
 
-## Resources
+# Email Configuration (Gmail)
+EMAIL=your_email@gmail.com
+EMAIL_PASS=your_app_password
 
-Check out a few resources that may come in handy when working with NestJS:
+# AI APIs (Optional)
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+OPENAI_API_KEY=your_openai_api_key
 
-## Support
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+# File Upload
+CLOUDINARY_NAME=your_cloudinary_name
+CLOUDINARY_KEY=your_cloudinary_key
+CLOUDINARY_SECRET=your_cloudinary_secret
 
-## Stay in touch
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+**Save:** `Ctrl+O` → `Enter` → `Ctrl+X`
 
-## License
+### 5. Run Application
+bash
+# Development mode (with hot-reload)
+npm run start:dev
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+# Production mode
+npm run build
+npm start
+
+
+✅ **Server is running:** `http://localhost:3000
+
+
+## 📊 Project Structure
+
+
+fyp_mgt_system_backend/
+├── src/
+│   ├── auth/                      # Authentication & JWT
+│   │   ├── auth.controller.ts
+│   │   ├── auth.service.ts
+│   │   └── auth.module.ts
+│   │
+│   ├── users/                     # User management
+│   │   ├── users.controller.ts
+│   │   ├── users.service.ts
+│   │   └── entities/
+│   │
+│   ├── students/                  # Student operations
+│   │   ├── students.controller.ts
+│   │   ├── students.service.ts
+│   │   └── entities/
+│   │
+│   ├── supervisor/                # Supervisor operations
+│   │   ├── supervisor.controller.ts
+│   │   ├── supervisor.service.ts
+│   │   └── entities/
+│   │
+│   ├── proposal/                  # Proposal management
+│   │   ├── proposal.controller.ts
+│   │   ├── proposal.service.ts
+│   │   └── entities/
+│   │
+│   ├── proposal-evaluation/       # Evaluation logic
+│   │   ├── proposal-evaluation.controller.ts
+│   │   ├── proposal-evaluation.service.ts
+│   │   └── entities/
+│   │
+│   ├── evaluation/                # Final evaluation module
+│   │   ├── evaluation.controller.ts
+│   │   ├── evaluation.service.ts
+│   │   └── entities/
+│   │
+│   ├── committee-assignment/      # Committee management
+│   │   ├── committee-assignment.controller.ts
+│   │   ├── committee-assignment.service.ts
+│   │   └── entities/
+│   │
+│   ├── fyp-office/                # Admin office operations
+│   │   ├── fyp-office.controller.ts
+│   │   ├── fyp-office.service.ts
+│   │   └── entities/
+│   │
+│   ├── chat/                      # Real-time WebSocket chat
+│   │   ├── chat.controller.ts
+│   │   ├── chat.service.ts
+│   │   ├── chat.gateway.ts        # WebSocket gateway
+│   │   └── entities/
+│   │
+│   ├── groups/                    # Student groups
+│   │   ├── groups.controller.ts
+│   │   ├── groups.service.ts
+│   │   └── entities/
+│   │
+│   ├── supervisor-idea/           # Supervisor ideas/guidelines
+│   │   ├── supervisor-idea.controller.ts
+│   │   ├── supervisor-idea.service.ts
+│   │   └── entities/
+│   │
+│   ├── gemini/                    # AI integration (Gemini)
+│   │   ├── gemini.service.ts
+│   │   └── gemini.module.ts
+│   │
+│   ├── config/                    # Configuration files
+│   │   └── typeOrm.config.ts      # Database configuration
+│   │
+│   ├── app.module.ts              # Main app module
+│   ├── app.controller.ts          # App controller
+│   ├── app.service.ts             # App service
+│   └── main.ts                    # Entry point
+│
+├── dist/                          # Compiled JavaScript (auto-generated)
+├── test/                          # Jest test files
+├── .env                           # Environment variables (not in git)
+├── .gitignore                     # Git ignore rules
+├── package.json                   # Dependencies
+├── tsconfig.json                  # TypeScript config
+├── jest.config.js                 # Jest testing config
+├── nest-cli.json                  # NestJS CLI config
+└── README.md                      # This file
+
+
+## 🛠️ Available Commands
+
+`bash
+# Development
+npm run start:dev                  # Hot-reload development server
+npm run start:debug               # Debug mode
+
+# Production
+npm run build                      # Compile TypeScript to JavaScript
+npm start                          # Run compiled app
+
+# Code Quality
+npm run lint                       # Run ESLint
+npm run format                     # Format code with Prettier
+
+## 🔧 Environment Variables Explained
+
+
+# Database Connection
+DB_HOST              - PostgreSQL host (default: localhost)
+DB_PORT              - PostgreSQL port (default: 5432)
+DB_USERNAME          - Database user (default: postgres)
+DB_PASSWORD          - Database password
+DB_NAME              - Database name (default: fyp_evaluation)
+DB_SYNCHRONIZE       - Auto-sync TypeORM entities (false in prod)
+
+# Server
+PORT                 - Server port (default: 3000)
+NODE_ENV             - Environment (development/production)
+
+# Authentication
+JWT_SECRET           - Secret key for JWT (min 32 characters)
+JWT_EXPIRATION       - Token expiration time (default: 1d)
+
+# Email Notifications
+EMAIL                - Gmail address for sending emails
+EMAIL_PASS           - Gmail app-specific password
+
+# AI Services
+GEMINI_API_KEY       - Google Gemini API key
+OPENAI_API_KEY       - OpenAI API key
+GROQ_API_KEY         - Groq API key
+
+# File Upload
+CLOUDINARY_NAME      - Cloudinary account name
+CLOUDINARY_KEY       - Cloudinary API key
+CLOUDINARY_SECRET    - Cloudinary API secret
+
+## 📦 Key Dependencies
+
+| Package | Version | Purpose |
+|---------|---------|---------|
+| NestJS | 11.0+ | Framework |
+| TypeORM | 0.3+ | ORM |
+| PostgreSQL | 14+ | Database |
+| JWT | 11.0+ | Authentication |
+| Multer | 2.2+ | File upload |
+| Socket.io | 4.8+ | Real-time chat |
+| Gemini AI | 0.24+ | AI integration |
+| OpenAI | 6.16+ | AI integration |
+| Nodemailer | 8.0+ | Email |
+| Passport | 0.7+ | Auth strategy |
+| Cloudinary | 2.10+ | Cloud storage |
+
+---
