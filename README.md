@@ -28,9 +28,8 @@
 
 ### 1. Clone Repository
 
-git clone <repo>
-cd <folder name>
-
+git clone https://github.com/assad177/fyp-management-system.git
+cd Fyp-management-system/  FYP-BACKEND/fyp_backend
 ### 2. Install Dependencies
 
 npm install
