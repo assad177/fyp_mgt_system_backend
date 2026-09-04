@@ -1,6 +1,6 @@
 # 🎓 FYP Evaluation & Assessment Management System
 
-A comprehensive **NestJS-based Final Year Project (FYP) Evaluation & Assessment Management System** designed to streamline project management, evaluation workflows, supervisor assignments, document reviews, and AI-powered project analysis.
+A comprehensive **NestJS-based Final Year Project (FYP) Evaluation & Assessment Management System** that streamlines project submission, supervisor allocation, committee reviews, evaluation workflows, document management, and AI-powered proposal analysis.
 
 **Author:** Assad Wazeer
 
@@ -8,99 +8,104 @@ A comprehensive **NestJS-based Final Year Project (FYP) Evaluation & Assessment 
 
 # 📌 Overview
 
-The FYP Evaluation & Assessment Management System helps universities manage the complete Final Year Project lifecycle, including:
+The FYP Evaluation & Assessment Management System is designed for universities to manage the complete lifecycle of Final Year Projects.
 
-* Student project submissions
-* Supervisor allocation
-* Dynamic evaluation phases
-* Committee reviews
-* External evaluations
-* AI-powered proposal analysis
+The platform enables:
+
+* Student project proposal submissions
+* Supervisor assignment and management
+* Committee assignment and evaluation
+* Multi-phase project assessment
 * Real-time communication
+* AI-powered proposal analysis
 * Automated notifications
-
-The system supports multiple user roles with dedicated dashboards and permissions.
+* Centralized project tracking
 
 ---
 
 # ✨ Features
 
-### 🔐 Authentication & Authorization
+## 🔐 Authentication & Authorization
 
-* JWT-based authentication
+* JWT Authentication
 * Role-Based Access Control (RBAC)
-* Secure route protection
+* Secure API Endpoints
+* Protected Routes
 
-### 👥 User Roles
+## 👥 User Roles
 
-* Admin
+* Admin / FYP Office
 * Student
 * Supervisor
 * Committee Member
 * External Evaluator
 
-### 📚 Project Management
+## 📚 Project Management
 
-* FYP idea submission
-* Project proposal management
-* Group creation & management
-* Supervisor assignment
-* Project progress tracking
+* Proposal Submission
+* Project Tracking
+* Supervisor Assignment
+* Group Management
+* Supervisor Idea Suggestions
 
-### 📊 Dynamic Evaluation System
+## 📊 Evaluation Management
 
 * Proposal Evaluation
 * Mid Evaluation
 * Progress Evaluation
 * Final Defense Evaluation
-* Configurable score weightages
-* Automatic final result calculation
+* Dynamic Evaluation Criteria
+* Score Weightage Calculation
+* Final Result Generation
 
-### 🤖 AI-Powered Analysis
+## 🤖 AI Integration
 
-* Proposal analysis
-* Duplicate project detection
-* Project recommendation system
-* Feasibility assessment
-* AI-generated feedback
+* Gemini AI Analysis
+* Proposal Quality Assessment
+* Duplicate Idea Detection
+* Project Recommendations
+* Feasibility Analysis
 
-### 📄 Document Management
+## 📄 Document Management
 
-* Proposal upload
-* Document storage
-* Cloudinary integration
-* File parsing & analysis
+* Proposal Upload
+* Document Processing
+* Cloudinary Storage
+* PDF & DOCX Analysis
 
-### 💬 Real-Time Communication
+## 💬 Real-Time Communication
 
-* WebSocket-based chat
-* Instant messaging
-* Notifications
+* Socket.IO Based Chat
+* Student ↔ Supervisor Communication
+* Committee Discussions
+* Instant Notifications
 
-### 📧 Email Notifications
+## 📧 Email Notifications
 
-* Gmail SMTP integration
-* Automated alerts
-* Evaluation notifications
-* Assignment notifications
+* Gmail SMTP Integration
+* Automated Alerts
+* Assignment Notifications
+* Evaluation Notifications
 
 ---
 
 # 🛠️ Tech Stack
 
-| Category                | Technology           |
-| ----------------------- | -------------------- |
-| Backend Framework       | NestJS               |
-| Language                | TypeScript           |
-| Database                | PostgreSQL           |
-| ORM                     | TypeORM              |
-| Authentication          | JWT + Passport       |
-| File Upload             | Multer               |
-| Cloud Storage           | Cloudinary           |
-| Real-Time Communication | Socket.io            |
-| AI Services             | Gemini, OpenAI, Groq |
-| Email Service           | Nodemailer           |
-| API Style               | REST API             |
+| Technology | Purpose                 |
+| ---------- | ----------------------- |
+| NestJS     | Backend Framework       |
+| TypeScript | Programming Language    |
+| PostgreSQL | Database                |
+| TypeORM    | ORM                     |
+| JWT        | Authentication          |
+| Passport   | Authentication Strategy |
+| Socket.IO  | Real-Time Communication |
+| Multer     | File Upload             |
+| Cloudinary | Cloud Storage           |
+| Nodemailer | Email Service           |
+| Gemini AI  | AI Analysis             |
+| OpenAI     | AI Processing           |
+| Groq       | AI Processing           |
 
 ---
 
@@ -109,74 +114,54 @@ The system supports multiple user roles with dedicated dashboards and permission
 ```text
 src/
 │
-├── auth/
-│   ├── controllers/
-│   ├── services/
-│   ├── guards/
-│   ├── strategies/
-│   └── dto/
+├── auth/                          # Authentication & Authorization
 │
-├── users/
-│   ├── controllers/
-│   ├── services/
+├── users/                         # User Management
+│
+├── students/                      # Student Operations
+│
+├── supervisor/                    # Supervisor Management
 │   ├── entities/
-│   └── dto/
+│   │   ├── supervisor.entity.ts
+│   │   └── supervision.request.entity.ts
+│   ├── supervisor.controller.ts
+│   ├── supervisor.service.ts
+│   └── supervisor.module.ts
 │
-├── students/
-├── supervisors/
-├── committees/
-├── external-evaluators/
-│
-├── groups/
-│   ├── controllers/
-│   ├── services/
-│   └── entities/
-│
-├── projects/
-│   ├── controllers/
-│   ├── services/
+├── groups/                        # Student Group Management
 │   ├── entities/
-│   └── dto/
+│   │   └── group.entity.ts
+│   ├── groups.controller.ts
+│   ├── groups.service.ts
+│   └── groups.module.ts
 │
-├── evaluations/
-│   ├── controllers/
-│   ├── services/
+├── proposal/                      # Proposal Submission
+│
+├── proposal-evaluation/           # Proposal Review & Evaluation
+│
+├── evaluation/                    # Mid, Progress & Final Evaluations
+│
+├── committee-assignment/          # Committee Assignment
+│
+├── supervisor-idea/               # Supervisor Suggested Ideas
+│
+├── fyp-office/                    # Administrative Operations
+│
+├── chat/                          # Real-Time Messaging
 │   ├── entities/
-│   └── dto/
+│   │   └── Message.entity.ts
+│   ├── chat.gateway.ts
+│   ├── chat.controller.ts
+│   ├── chat.service.ts
+│   └── chat.module.ts
 │
-├── documents/
-│   ├── controllers/
-│   ├── services/
-│   └── entities/
-│
-├── ai/
-│   ├── services/
-│   ├── providers/
-│   └── prompts/
-│
-├── chat/
-│   ├── gateways/
-│   ├── services/
-│   └── entities/
-│
-├── notifications/
-│   ├── services/
-│   └── templates/
-│
-├── common/
-│   ├── decorators/
-│   ├── filters/
-│   ├── guards/
-│   ├── interceptors/
-│   └── utils/
-│
-├── database/
-│   ├── entities/
-│   ├── migrations/
-│   └── seeds/
+├── gemini/                        # AI Services
 │
 ├── config/
+│   └── typeOrm.config.ts
 │
+├── app.controller.ts
+├── app.service.ts
 ├── app.module.ts
 └── main.ts
 ```
@@ -187,7 +172,7 @@ src/
 
 ## Prerequisites
 
-Install the following software:
+Make sure the following software is installed:
 
 * Node.js v18+
 * PostgreSQL v14+
@@ -201,7 +186,7 @@ Install the following software:
 ```bash
 git clone https://github.com/assad177/fyp-management-system.git
 
-cd Fyp-management-system/FYP-BACKEND/fyp_backend
+cd FYP-BACKEND/fyp_backend
 ```
 
 ---
@@ -214,7 +199,7 @@ npm install
 
 ---
 
-## 3. Database Setup
+## 3. Configure PostgreSQL
 
 Login to PostgreSQL:
 
@@ -252,7 +237,7 @@ PORT=3000
 NODE_ENV=development
 
 # JWT
-JWT_SECRET=your_jwt_secret_key_here_min_32_chars
+JWT_SECRET=your_secure_jwt_secret_key
 JWT_EXPIRATION=1d
 
 # Email
@@ -286,18 +271,25 @@ npm run start:dev
 npm run start:debug
 ```
 
-### Production Mode
+### Production Build
 
 ```bash
 npm run build
-
-npm start
+npm run start:prod
 ```
 
-Application will be available at:
+---
+
+# 🌐 API Base URL
 
 ```text
-http://localhost:3000
+http://localhost:3000/api
+```
+
+Example:
+
+```text
+http://localhost:3000/api/auth/login
 ```
 
 ---
@@ -312,10 +304,20 @@ npm run start:dev
 npm run start:debug
 ```
 
-## Build
+## Production
 
 ```bash
 npm run build
+npm run start:prod
+```
+
+## Testing
+
+```bash
+npm run test
+npm run test:watch
+npm run test:cov
+npm run test:e2e
 ```
 
 ## Code Quality
@@ -333,64 +335,60 @@ npm run format
 
 | Variable       | Description             |
 | -------------- | ----------------------- |
-| DB_HOST        | PostgreSQL host         |
-| DB_PORT        | PostgreSQL port         |
-| DB_USERNAME    | Database username       |
-| DB_PASSWORD    | Database password       |
-| DB_NAME        | Database name           |
-| DB_SYNCHRONIZE | TypeORM synchronization |
+| DB_HOST        | PostgreSQL Host         |
+| DB_PORT        | PostgreSQL Port         |
+| DB_USERNAME    | Database Username       |
+| DB_PASSWORD    | Database Password       |
+| DB_NAME        | Database Name           |
+| DB_SYNCHRONIZE | TypeORM Synchronization |
 
 ## Authentication
 
 | Variable       | Description           |
 | -------------- | --------------------- |
-| JWT_SECRET     | JWT secret key        |
-| JWT_EXPIRATION | Token expiration time |
+| JWT_SECRET     | JWT Secret Key        |
+| JWT_EXPIRATION | Token Expiration Time |
 
 ## Email
 
 | Variable   | Description        |
 | ---------- | ------------------ |
-| EMAIL      | Gmail address      |
+| EMAIL      | Gmail Address      |
 | EMAIL_PASS | Gmail App Password |
 
 ## AI Services
 
-| Variable       | Description       |
-| -------------- | ----------------- |
-| GEMINI_API_KEY | Google Gemini API |
-| OPENAI_API_KEY | OpenAI API        |
-| GROQ_API_KEY   | |
+| Variable       | Description           |
+| -------------- | --------------------- |
+| GEMINI_API_KEY | Google Gemini API Key |
+| OPENAI_API_KEY | OpenAI API Key        |
+| GROQ_API_KEY   | Groq API Key          |
 
 ## Cloudinary
 
-| Variable          | Description           |
-| ----------------- | --------------------- |
-| CLOUDINARY_NAME   | Cloudinary Cloud Name |
-| CLOUDINARY_KEY    | Cloudinary API Key    |
-| CLOUDINARY_SECRET | Cloudinary Secret Key |
+| Variable          | Description |
+| ----------------- | ----------- |
+| CLOUDINARY_NAME   | Cloud Name  |
+| CLOUDINARY_KEY    | API Key     |
+| CLOUDINARY_SECRET | API Secret  |
 
 ---
 
-# 📦 Key Dependencies
+# 📦 Major Dependencies
 
-| Package    | Purpose                 |
-| ---------- | ----------------------- |
-| NestJS     | Backend Framework       |
-| TypeORM    | Database ORM            |
-| PostgreSQL | Relational Database     |
-| JWT        | Authentication          |
-| Passport   | Auth Strategy           |
-| Socket.io  | Real-Time Communication |
-| Multer     | File Upload             |
-| Cloudinary | Cloud Storage           |
-| Nodemailer | Email Service           |
-| Gemini AI  | AI Analysis             |
-| OpenAI     | AI Analysis             |
-| Groq       | AI Processing           |
+| Package    | Version |
+| ---------- | ------- |
+| NestJS     | 11.x    |
+| TypeORM    | 0.3.x   |
+| PostgreSQL | 14+     |
+| JWT        | 11.x    |
+| Passport   | 0.7.x   |
+| Socket.IO  | 4.x     |
+| Multer     | 2.x     |
+| Cloudinary | 2.x     |
+| Nodemailer | 8.x     |
+| Gemini AI  | Latest  |
+| OpenAI     | Latest  |
+| Groq SDK   | Latest  |
 
 ---
-
-
-
-
