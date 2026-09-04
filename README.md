@@ -1,56 +1,244 @@
-# FYP Evaluation & Assessment Management System - Backend
+# 🎓 FYP Evaluation & Assessment Management System
 
-> A comprehensive NestJS-based Final Year Project (FYP) evaluation management system with AI-powered analysis, real-time chat, and role-based dashboards.
+A comprehensive **NestJS-based Final Year Project (FYP) Evaluation & Assessment Management System** designed to streamline project management, evaluation workflows, supervisor assignments, document reviews, and AI-powered project analysis.
 
-**Author:** Assad Wazeer 
-
-## 🎯 Features Overview
-
-✅ **Role-Based Access Control** - Admin, Supervisor, Student, Committee, External Evaluator  
-✅ **Dynamic Evaluation Phases** - Proposal, Mid, Progress, Final Defense  
-✅ **AI-Powered Analysis** - Gemini, OpenAI, Groq integration  
-✅ **Document Management** - Upload, parse, and analyze proposals  
-✅ **Real-Time Chat** - WebSocket-based messaging system  
-✅ **Email Notifications** - Gmail SMTP integration  
-✅ **Group Management** - Student group handling  
-✅ **Evaluation Tracking** - Score weightage and final result calculation  
-✅ **JWT Authentication** - Secure token-based auth  
+**Author:** Assad Wazeer
 
 ---
 
-## 🚀 Quick Start (5 Minutes)
+# 📌 Overview
 
-### Prerequisites
-- **Node.js** v18+ ([Download](https://nodejs.org/))
-- **PostgreSQL** v14+ ([Download](https://www.postgresql.org/))
-- **Git** ([Download](https://git-scm.com/))
-- **npm** 
+The FYP Evaluation & Assessment Management System helps universities manage the complete Final Year Project lifecycle, including:
 
-### 1. Clone Repository
+* Student project submissions
+* Supervisor allocation
+* Dynamic evaluation phases
+* Committee reviews
+* External evaluations
+* AI-powered proposal analysis
+* Real-time communication
+* Automated notifications
 
+The system supports multiple user roles with dedicated dashboards and permissions.
+
+---
+
+# ✨ Features
+
+### 🔐 Authentication & Authorization
+
+* JWT-based authentication
+* Role-Based Access Control (RBAC)
+* Secure route protection
+
+### 👥 User Roles
+
+* Admin
+* Student
+* Supervisor
+* Committee Member
+* External Evaluator
+
+### 📚 Project Management
+
+* FYP idea submission
+* Project proposal management
+* Group creation & management
+* Supervisor assignment
+* Project progress tracking
+
+### 📊 Dynamic Evaluation System
+
+* Proposal Evaluation
+* Mid Evaluation
+* Progress Evaluation
+* Final Defense Evaluation
+* Configurable score weightages
+* Automatic final result calculation
+
+### 🤖 AI-Powered Analysis
+
+* Proposal analysis
+* Duplicate project detection
+* Project recommendation system
+* Feasibility assessment
+* AI-generated feedback
+
+### 📄 Document Management
+
+* Proposal upload
+* Document storage
+* Cloudinary integration
+* File parsing & analysis
+
+### 💬 Real-Time Communication
+
+* WebSocket-based chat
+* Instant messaging
+* Notifications
+
+### 📧 Email Notifications
+
+* Gmail SMTP integration
+* Automated alerts
+* Evaluation notifications
+* Assignment notifications
+
+---
+
+# 🛠️ Tech Stack
+
+| Category                | Technology           |
+| ----------------------- | -------------------- |
+| Backend Framework       | NestJS               |
+| Language                | TypeScript           |
+| Database                | PostgreSQL           |
+| ORM                     | TypeORM              |
+| Authentication          | JWT + Passport       |
+| File Upload             | Multer               |
+| Cloud Storage           | Cloudinary           |
+| Real-Time Communication | Socket.io            |
+| AI Services             | Gemini, OpenAI, Groq |
+| Email Service           | Nodemailer           |
+| API Style               | REST API             |
+
+---
+
+# 📁 Project Structure
+
+```text
+src/
+│
+├── auth/
+│   ├── controllers/
+│   ├── services/
+│   ├── guards/
+│   ├── strategies/
+│   └── dto/
+│
+├── users/
+│   ├── controllers/
+│   ├── services/
+│   ├── entities/
+│   └── dto/
+│
+├── students/
+├── supervisors/
+├── committees/
+├── external-evaluators/
+│
+├── groups/
+│   ├── controllers/
+│   ├── services/
+│   └── entities/
+│
+├── projects/
+│   ├── controllers/
+│   ├── services/
+│   ├── entities/
+│   └── dto/
+│
+├── evaluations/
+│   ├── controllers/
+│   ├── services/
+│   ├── entities/
+│   └── dto/
+│
+├── documents/
+│   ├── controllers/
+│   ├── services/
+│   └── entities/
+│
+├── ai/
+│   ├── services/
+│   ├── providers/
+│   └── prompts/
+│
+├── chat/
+│   ├── gateways/
+│   ├── services/
+│   └── entities/
+│
+├── notifications/
+│   ├── services/
+│   └── templates/
+│
+├── common/
+│   ├── decorators/
+│   ├── filters/
+│   ├── guards/
+│   ├── interceptors/
+│   └── utils/
+│
+├── database/
+│   ├── entities/
+│   ├── migrations/
+│   └── seeds/
+│
+├── config/
+│
+├── app.module.ts
+└── main.ts
+```
+
+---
+
+# 🚀 Getting Started
+
+## Prerequisites
+
+Install the following software:
+
+* Node.js v18+
+* PostgreSQL v14+
+* Git
+* npm
+
+---
+
+## 1. Clone Repository
+
+```bash
 git clone https://github.com/assad177/fyp-management-system.git
-cd Fyp-management-system/  FYP-BACKEND/fyp_backend
-### 2. Install Dependencies
 
+cd Fyp-management-system/FYP-BACKEND/fyp_backend
+```
+
+---
+
+## 2. Install Dependencies
+
+```bash
 npm install
+```
 
-### 3. Database Setup
+---
 
-# Login to PostgreSQL
+## 3. Database Setup
+
+Login to PostgreSQL:
+
+```bash
 sudo -u postgres psql
+```
 
-# Create user and database
+Create database:
+
+```sql
 ALTER USER postgres WITH PASSWORD 'postgres';
+
 CREATE DATABASE fyp_evaluation;
+
 \q
+```
 
+---
 
-### 4. Environment Configuration
-# Create .env file
-nano .env
+## 4. Environment Configuration
 
-Paste this configuration:
-env
+Create a `.env` file in the project root.
+
+```env
 # Database
 DB_HOST=localhost
 DB_PORT=5432
@@ -63,106 +251,146 @@ DB_SYNCHRONIZE=false
 PORT=3000
 NODE_ENV=development
 
-# JWT Authentication
+# JWT
 JWT_SECRET=your_jwt_secret_key_here_min_32_chars
 JWT_EXPIRATION=1d
 
-# Email Configuration (Gmail)
+# Email
 EMAIL=your_email@gmail.com
 EMAIL_PASS=your_app_password
 
-# AI APIs (Optional)
+# AI APIs
+GEMINI_API_KEY=
+OPENAI_API_KEY=
+GROQ_API_KEY=
 
-OPENAI_API_KEY=your_openai_api_key
-
-
-# File Upload
-CLOUDINARY_NAME=your_cloudinary_name
-CLOUDINARY_KEY=your_cloudinary_key
-CLOUDINARY_SECRET=your_cloudinary_secret
-
-
-**Save:** `Ctrl+O` → `Enter` → `Ctrl+X`
-
-### 5. Run Application
-bash
-# Development mode (with hot-reload)
-npm run start:dev
-
-# Production mode
-npm run build
-npm start
-
-
-✅ **Server is running:** `http://localhost:3000
-
-
-## 📊 Project Structure
-
-
-
-## 🛠️ Available Commands
-
-`bash
-# Development
-npm run start:dev                  # Hot-reload development server
-npm run start:debug               # Debug mode
-
-# Production
-npm run build                      # Compile TypeScript to JavaScript
-npm start                          # Run compiled app
-
-# Code Quality
-npm run lint                       # Run ESLint
-npm run format                     # Format code with Prettier
-
-## 🔧 Environment Variables Explained
-
-
-# Database Connection
-DB_HOST              - PostgreSQL host (default: localhost)
-DB_PORT              - PostgreSQL port (default: 5432)
-DB_USERNAME          - Database user (default: postgres)
-DB_PASSWORD          - Database password
-DB_NAME              - Database name (default: fyp_evaluation)
-DB_SYNCHRONIZE       - Auto-sync TypeORM entities (false in prod)
-
-# Server
-PORT                 - Server port (default: 3000)
-NODE_ENV             - Environment (development/production)
-
-# Authentication
-JWT_SECRET           - Secret key for JWT (min 32 characters)
-JWT_EXPIRATION       - Token expiration time (default: 1d)
-
-# Email Notifications
-EMAIL                - Gmail address for sending emails
-EMAIL_PASS           - Gmail app-specific password
-
-# AI Services
-GEMINI_API_KEY       - Google Gemini API key
-OPENAI_API_KEY       - OpenAI API key
-GROQ_API_KEY         - Groq API key
-
-# File Upload
-CLOUDINARY_NAME      - Cloudinary account name
-CLOUDINARY_KEY       - Cloudinary API key
-CLOUDINARY_SECRET    - Cloudinary API secret
-
-## 📦 Key Dependencies
-
-| Package | Version | Purpose |
-|---------|---------|---------|
-| NestJS | 11.0+ | Framework |
-| TypeORM | 0.3+ | ORM |
-| PostgreSQL | 14+ | Database |
-| JWT | 11.0+ | Authentication |
-| Multer | 2.2+ | File upload |
-| Socket.io | 4.8+ | Real-time chat |
-| Gemini AI | 0.24+ | AI integration |
-| OpenAI | 6.16+ | AI integration |
-| Nodemailer | 8.0+ | Email |
-| Passport | 0.7+ | Auth strategy |
-| Cloudinary | 2.10+ | Cloud storage |
+# Cloudinary
+CLOUDINARY_NAME=
+CLOUDINARY_KEY=
+CLOUDINARY_SECRET=
+```
 
 ---
+
+## 5. Run Application
+
+### Development Mode
+
+```bash
+npm run start:dev
+```
+
+### Debug Mode
+
+```bash
+npm run start:debug
+```
+
+### Production Mode
+
+```bash
+npm run build
+
+npm start
+```
+
+Application will be available at:
+
+```text
+http://localhost:3000
+```
+
+---
+
+# ⚙️ Available Commands
+
+## Development
+
+```bash
+npm run start
+npm run start:dev
+npm run start:debug
+```
+
+## Build
+
+```bash
+npm run build
+```
+
+## Code Quality
+
+```bash
+npm run lint
+npm run format
+```
+
+---
+
+# 🔑 Environment Variables
+
+## Database
+
+| Variable       | Description             |
+| -------------- | ----------------------- |
+| DB_HOST        | PostgreSQL host         |
+| DB_PORT        | PostgreSQL port         |
+| DB_USERNAME    | Database username       |
+| DB_PASSWORD    | Database password       |
+| DB_NAME        | Database name           |
+| DB_SYNCHRONIZE | TypeORM synchronization |
+
+## Authentication
+
+| Variable       | Description           |
+| -------------- | --------------------- |
+| JWT_SECRET     | JWT secret key        |
+| JWT_EXPIRATION | Token expiration time |
+
+## Email
+
+| Variable   | Description        |
+| ---------- | ------------------ |
+| EMAIL      | Gmail address      |
+| EMAIL_PASS | Gmail App Password |
+
+## AI Services
+
+| Variable       | Description       |
+| -------------- | ----------------- |
+| GEMINI_API_KEY | Google Gemini API |
+| OPENAI_API_KEY | OpenAI API        |
+| GROQ_API_KEY   | |
+
+## Cloudinary
+
+| Variable          | Description           |
+| ----------------- | --------------------- |
+| CLOUDINARY_NAME   | Cloudinary Cloud Name |
+| CLOUDINARY_KEY    | Cloudinary API Key    |
+| CLOUDINARY_SECRET | Cloudinary Secret Key |
+
+---
+
+# 📦 Key Dependencies
+
+| Package    | Purpose                 |
+| ---------- | ----------------------- |
+| NestJS     | Backend Framework       |
+| TypeORM    | Database ORM            |
+| PostgreSQL | Relational Database     |
+| JWT        | Authentication          |
+| Passport   | Auth Strategy           |
+| Socket.io  | Real-Time Communication |
+| Multer     | File Upload             |
+| Cloudinary | Cloud Storage           |
+| Nodemailer | Email Service           |
+| Gemini AI  | AI Analysis             |
+| OpenAI     | AI Analysis             |
+| Groq       | AI Processing           |
+
+---
+
+
+
+
